@@ -6,9 +6,9 @@ from . import views
 
 urlpatterns = [
     path('welcome', views.welcome),
-    path('printers', views.printers),
-    path('printers/default', views.printers_default),
-    path('print', views.print_data),
-    path('print/binary', views.printers),
-    path('print/url', views.printers),
+    path('/v1/printers', views.printers),
+    path('/v1/printers/default', views.printers_default),
+    path('/v1/print', views.print_data),
+    path('/v1/print/binary', views.printers),
+    path('/v1/print/url', views.printers),
 ]
