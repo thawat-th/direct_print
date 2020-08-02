@@ -4,6 +4,10 @@ import win32print
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
+# from api.forms import DocumentForm
+# from api.models import Document
+from api.serializers import DocumentSerializer
+
 
 @api_view(["GET"])
 def welcome(request):
@@ -34,6 +38,17 @@ def print_data(request):
     return JsonResponse("", safe=False)
 
 
+@api_view(["POST"])
+def print_binary(request, pk=None):
+    serializer = DocumentSerializer(instance=None, data=request.data)
+
+    # form = DocumentForm(request.POST, request.FILES)
+    # if form.is_valid():
+    #     newdoc = Document(docfile=request.FILES['docfile'])
+    #     newdoc.save()
+    return None
+
+
 def print_job(data):
     printer = win32print.GetDefaultPrinter()
     if printer:
@@ -47,3 +62,5 @@ def print_job(data):
         win32print.ClosePrinter(op)
     else:
         print("Printer not found!")
+
+
