@@ -2,13 +2,9 @@
 
 from django.urls import path
 
-from . import views
+from .views import PrintFileView, PrinterView
 
 urlpatterns = [
-    path('welcome', views.welcome),
-    path('v1/printers', views.printers),
-    path('v1/printers/default', views.printers_default),
-    path('v1/print', views.print_data),
-    path('v1/print/binary', views.print_binary),
-    path('v1/print/url', views.printers),
+    path(r'v1/print', PrintFileView.as_view(), name='Print'),
+    path(r'v1/printers', PrinterView.as_view(), name='Printer'),
 ]

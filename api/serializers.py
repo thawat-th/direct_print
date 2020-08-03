@@ -1,9 +1,15 @@
 from rest_framework import serializers
 
-from api.models import Document
+from api.models import Print, Printer
 
 
-class DocumentSerializer(serializers.ModelSerializer):
+class PrinterSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Document
-        fields = ('file')
+        model = Printer
+        fields = "__all__"
+
+
+class PrintFileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Print
+        fields = "__all__"

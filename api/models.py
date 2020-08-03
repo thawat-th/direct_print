@@ -1,5 +1,9 @@
 from django.db import models
 
 
-class Document(models.Model):
-    file = models.FileField(upload_to='documents/%Y/%m/%d')
+class Printer(models.Model):
+    printer_name = models.TextField
+
+
+class Print(models.Model):
+    file = models.FileField()

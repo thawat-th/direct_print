@@ -1,66 +1,61 @@
-import base64
+from pathlib import Path
 
 import win32print
-from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework import status
+from rest_framework.generics import CreateAPIView
+from rest_framework.parsers import MultiPartParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-# from api.forms import DocumentForm
-# from api.models import Document
-from api.serializers import DocumentSerializer
-
-
-@api_view(["GET"])
-def welcome(request):
-    content = {
-        "message": "Welcome to the Direct print"
-    }
-    return JsonResponse(content)
+from api.models import Printer
+from api.serializers import PrintFileSerializer
 
 
-@api_view(["GET"])
-def printers(request):
-    list = win32print.EnumPrinters(win32print.PRINTER_ENUM_NAME, None, 1)
-    return JsonResponse(list, safe=False)
+class PrintFileView(CreateAPIView):
+    serializer_class = PrintFileSerializer
+    parser_classes = (MultiPartParser,)
+
+    def post(self, request, format=None):
+        serializer = PrintFileSerializer(data=request.data)
+
+        file = request.FILES['file']
+        filename = file.name
+        print(filename)
+        print(file.content_type)
+        print(file.size)
+
+        rd = file.read()
+
+        printer_name = win32print.GetDefaultPrinter()
+        print(printer_name)
+
+        print_defaults = {"DesiredAccess": win32print.PRINTER_ACCESS_USE}
+        h = win32print.OpenPrinter(printer_name, print_defaults)
+        hJob = win32print.StartDocPrinter(h, 1, (filename, None, "RAW"))
+        win32print.StartPagePrinter(h)
+        b = win32print.WritePrinter(h, rd)
+        win32print.EndPagePrinter(h)
+        win32print.EndDocPrinter(h)
+        win32print.ClosePrinter(h)
+        print(b)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET"])
-def printers_default(request):
-    printer = win32print.GetDefaultPrinter()
-    return JsonResponse(printer, safe=False)
+class PrinterView(APIView):
+    serializer_class = PrintFileSerializer
 
+    def get(self, request):
+        printers = Printer.objects.all()
+        serializer = PrintFileSerializer(printers, many=True)
+        return Response(serializer.data)
 
-@api_view(["POST"])
-def print_data(request):
-    raw = request.POST.get("data")
-    data = base64.b64decode(raw, None, True)
-    if data:
-        print_job(data)
-    return JsonResponse("", safe=False)
-
-
-@api_view(["POST"])
-def print_binary(request, pk=None):
-    serializer = DocumentSerializer(instance=None, data=request.data)
-
-    # form = DocumentForm(request.POST, request.FILES)
-    # if form.is_valid():
-    #     newdoc = Document(docfile=request.FILES['docfile'])
-    #     newdoc.save()
-    return None
-
-
-def print_job(data):
-    printer = win32print.GetDefaultPrinter()
-    if printer:
-        print("Print job!")
-        op = win32print.OpenPrinter(printer)
-        win32print.StartDocPrinter(op, 1, ("Printing", None, "RAW"))
-        win32print.StartPagePrinter(op)
-        win32print.WritePrinter(op, data)
-        win32print.EndPagePrinter(op)
-        win32print.EndDocPrinter(op)
-        win32print.ClosePrinter(op)
-    else:
-        print("Printer not found!")
-
-
+    def post(self, request, format=None):
+        serializer = PrintFileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

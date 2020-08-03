@@ -43,17 +43,11 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
-    'PAGE_SIZE': 100,
-    'DEFAULT_FILTER_BACKENDS': [
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ],
     'DEFAULT_MODEL_SERIALIZER_CLASS': [
         'rest_framework.serializers.ModelSerializer',
     ],
-    'DEFAULT_PARSER_CLASSES':[
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.FileUploadParser',
         'rest_framework.parsers.FormParser',
         'rest_framework.parsers.MultiPartParser',
         'rest_framework.parsers.JSONParser',
