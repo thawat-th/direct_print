@@ -1,5 +1,4 @@
-from pathlib import Path
-
+import win32api
 import win32print
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -17,28 +16,8 @@ class PrintFileView(CreateAPIView):
 
     def post(self, request, format=None):
         serializer = PrintFileSerializer(data=request.data)
-
-        file = request.FILES['file']
-        filename = file.name
-        print(filename)
-        print(file.content_type)
-        print(file.size)
-
-        rd = file.read()
-
-        printer_name = win32print.GetDefaultPrinter()
-        print(printer_name)
-
-        print_defaults = {"DesiredAccess": win32print.PRINTER_ACCESS_USE}
-        h = win32print.OpenPrinter(printer_name, print_defaults)
-        hJob = win32print.StartDocPrinter(h, 1, (filename, None, "RAW"))
-        win32print.StartPagePrinter(h)
-        b = win32print.WritePrinter(h, rd)
-        win32print.EndPagePrinter(h)
-        win32print.EndDocPrinter(h)
-        win32print.ClosePrinter(h)
-        print(b)
-
+        file_obj = request.FILES['file']
+        win32api.ShellExecute(0, "print", file_obj.name, '/d:"%s"' % win32print.GetDefaultPrinter(), ".", 0)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
