@@ -17,9 +17,14 @@ class PrintFileView(CreateAPIView):
     def post(self, request, format=None):
         serializer = PrintFileSerializer(data=request.data)
         file_obj = request.FILES['file']
-        win32api.ShellExecute(0, "print", file_obj.name, '/d:"%s"' % win32print.GetDefaultPrinter(), ".", 0)
+
         if serializer.is_valid():
             serializer.save()
+
+        printer = win32print.GetDefaultPrinter();
+
+        if printer:
+            win32api.ShellExecute(0, "print", file_obj.name, '/d:"%s"' % printer, ".", 0)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
