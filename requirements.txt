@@ -18,7 +18,7 @@ packaging==20.4
 Pillow==7.2.0
 pyparsing==2.4.7
 pytz==2020.1
-pywin32==228
+pywin32==301
 requests==2.24.0
 ruamel.yaml==0.16.10
 ruamel.yaml.clib==0.2.0
